@@ -1,0 +1,56 @@
+# .github/workflows/ci-cd.yml
+name: CI/CD Pipeline for Streamlit App
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      # Build the Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t streamlit-app .
+
+      # Run tests (if any)
+      - name: Run tests
+        run: |
+          # Add your testing framework commands here, e.g., pytest
+          echo "Run tests here"
+
+      # Push to Docker Hub (if desired)
+      - name: Push Docker image to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          docker tag streamlit-app $DOCKER_USERNAME/streamlit-app:latest
+          docker push $DOCKER_USERNAME/streamlit-app:latest
+
+      # Deploy to a server (example: AWS EC2 or another cloud)
+      - name: Deploy to Server
+        run: |
+          # Add your deployment commands here, for example:
+          echo "Deploying to production server"
